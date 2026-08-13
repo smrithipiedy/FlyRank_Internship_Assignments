@@ -40,3 +40,18 @@ def get_task(task_id: int = Path(..., description="The ID of the task to retriev
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.post("/tasks")
+def create_task(task: dict):
+    title = task.get("title") if isinstance(task, dict) else None
+
+    if title is None or not isinstance(title, str) or title.strip() == "":
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Title is required and cannot be empty"},
+        )
+
+    new_task = {"id": max((t["id"] for t in tasks), default=0) + 1, "title": title.strip(), "done": False}
+    tasks.append(new_task)
+    return JSONResponse(status_code=201, content=new_task)
