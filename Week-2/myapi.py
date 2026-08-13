@@ -10,12 +10,12 @@ tasks = [
     {"id": 3, "done": False},
 ]
 
-@app.get("/")
+@app.get("/", summary="Home endpoint")
 def index():
     return {"message": "Hello, World!"}
 
 
-@app.get("/get-tasks/{tasks_id}")
+@app.get("/get-tasks/{tasks_id}", summary="Get a task by id (legacy route)")
 def get_tasks(tasks_id: int = Path(..., description="The ID of the task to retrieve", gt=0)):
     # Keep backward-compatible route: interpret as task id lookup
     for t in tasks:
@@ -24,12 +24,12 @@ def get_tasks(tasks_id: int = Path(..., description="The ID of the task to retri
     return JSONResponse(status_code=404, content={"error": f"Task {tasks_id} not found"})
 
 
-@app.get("/tasks")
+@app.get("/tasks", summary="List all tasks")
 def list_tasks():
     return tasks
 
 
-@app.get("/tasks/{task_id}")
+@app.get("/tasks/{task_id}", summary="Get one task by id")
 def get_task(task_id: int = Path(..., description="The ID of the task to retrieve", gt=0)):
     for t in tasks:
         if t["id"] == task_id:
@@ -37,12 +37,12 @@ def get_task(task_id: int = Path(..., description="The ID of the task to retriev
     return JSONResponse(status_code=404, content={"error": f"Task {task_id} not found"})
 
 
-@app.get("/health")
+@app.get("/health", summary="Health check")
 def health():
     return {"status": "ok"}
 
 
-@app.post("/tasks")
+@app.post("/tasks", summary="Create a new task")
 def create_task(task: dict):
     title = task.get("title") if isinstance(task, dict) else None
 
@@ -57,7 +57,7 @@ def create_task(task: dict):
     return JSONResponse(status_code=201, content=new_task)
 
 
-@app.put("/tasks/{task_id}")
+@app.put("/tasks/{task_id}", summary="Update a task")
 def update_task(task_id: int, task: dict):
     if not isinstance(task, dict):
         return JSONResponse(status_code=400, content={"error": "Request body must be a JSON object"})
@@ -87,7 +87,7 @@ def update_task(task_id: int, task: dict):
     return JSONResponse(status_code=404, content={"error": f"Task {task_id} not found"})
 
 
-@app.delete("/tasks/{task_id}")
+@app.delete("/tasks/{task_id}", summary="Delete a task")
 def delete_task(task_id: int):
     for i, task in enumerate(tasks):
         if task["id"] == task_id:
