@@ -1,0 +1,6 @@
+# SQLite database — regenerated automatically by init_db.py at startup.
+# Keeping it out of git means each clone starts with a clean, fresh DB.
+tasks.db
+__pycache__/
+*.pyc
+.venv/

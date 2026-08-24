@@ -1,15 +1,3 @@
-"""Task API backed by a SQLite database.
-
-Stage 1 (Week-3_A2):
-- Reads from `tasks.db` instead of an in-memory list.
-- `GET /tasks`        -> SELECT * FROM tasks
-- `GET /tasks/{id}`   -> SELECT * FROM tasks WHERE id = ?
-- Unknown ids return 404 + `{"error": "Task not found"}`.
-
-Run:
-    uvicorn myapi:app --host 127.0.0.1 --port 3000
-"""
-
 from __future__ import annotations
 
 import os
