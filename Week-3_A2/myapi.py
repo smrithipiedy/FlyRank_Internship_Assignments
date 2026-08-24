@@ -35,6 +35,16 @@ class TaskIn(BaseModel):
     title: str = Field(..., min_length=1)
 
 
+class TaskUpdate(BaseModel):
+    """Payload accepted by PUT /tasks/{id}.
+
+    Either field is optional so callers can update just the title, just
+    `done`, or both. Empty/whitespace-only titles are rejected.
+    """
+    title: str | None = Field(default=None, min_length=1)
+    done: bool | None = None
+
+
 def _row_to_dict(row: sqlite3.Row | None) -> dict | None:
     """Convert a sqlite3.Row into the JSON shape the API returns.
 
@@ -139,3 +149,92 @@ def create_task(payload: TaskIn):
         conn.close()
 
     return _row_to_dict(row)
+
+
+@app.put("/tasks/{task_id}", summary="Update a task")
+def update_task(task_id: int, payload: TaskUpdate):
+    """Update an existing task. Returns 404 if no such task exists.
+
+    Validation matches Assignment 1:
+      * at least one of `title` or `done` must be provided
+      * `title`, if provided, cannot be empty/whitespace-only
+      * `done`, if provided, must be a real boolean
+    """
+    # Refuse empty payloads before touching the database.
+    if payload.title is None and payload.done is None:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "At least one field (title or done) is required"},
+        )
+
+    title = payload.title.strip() if payload.title is not None else None
+    if title is not None and title == "":
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Title cannot be empty"},
+        )
+
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        # Confirm the row exists first so we can distinguish "not found"
+        # from "nothing changed". `rowcount` alone can't tell us that.
+        existing = cur.execute(
+            "SELECT id, title, done FROM tasks WHERE id = ?",
+            (task_id,),
+        ).fetchone()
+        if existing is None:
+            return JSONResponse(
+                status_code=404,
+                content={"error": "Task not found"},
+            )
+
+        # Build the UPDATE dynamically based on which fields were supplied.
+        # We still pass every value as a parameter — never concatenated.
+        sets: list[str] = []
+        params: list = []
+        if title is not None:
+            sets.append("title = ?")
+            params.append(title)
+        if payload.done is not None:
+            sets.append("done = ?")
+            # Store as integer (0/1) to match the column type.
+            params.append(1 if payload.done else 0)
+        params.append(task_id)
+
+        cur.execute(
+            f"UPDATE tasks SET {', '.join(sets)} WHERE id = ?",
+            params,
+        )
+        conn.commit()
+
+        updated = cur.execute(
+            "SELECT id, title, done FROM tasks WHERE id = ?",
+            (task_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+
+    return _row_to_dict(updated)
+
+
+@app.delete("/tasks/{task_id}", summary="Delete a task", status_code=204)
+def delete_task(task_id: int):
+    """Delete a task by id. Returns 204 on success, 404 if no such task."""
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
+        conn.commit()
+        deleted = cur.rowcount
+    finally:
+        conn.close()
+
+    if deleted == 0:
+        return JSONResponse(
+            status_code=404,
+            content={"error": "Task not found"},
+        )
+
+    # 204 No Content — empty body, same as Assignment 1.
+    return JSONResponse(status_code=204, content=None)
