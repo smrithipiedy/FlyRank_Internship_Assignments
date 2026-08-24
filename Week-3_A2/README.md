@@ -1,29 +1,30 @@
-# Task API — Stage 4
+# Task API — Database Project
 
-Stage 4: explored SQLite by running queries by hand against `tasks.db` and
-confirming each change shows up through the running API with no restart.
+A simple Task API backed by a SQLite database, implementing full CRUD operations.
 
-## Query I ran
+## Getting Started
+
+### Run the Project
+To start the server, run the following command from the `Week-3_A2` directory:
+```bash
+uvicorn myapi:app --host 127.0.0.1 --port 3000
+```
+Once the server is running, you can access the interactive API documentation at `http://127.0.0.1:3000/docs`.
+
+### Database Setup
+The project uses **SQLite**, which was chosen because it is a serverless, single-file database that requires zero setup and ensures data survives server restarts.
+
+The database file lives at `tasks.db` in the project root. It is created automatically upon the first run of the application. It is listed in `.gitignore` so that every user who clones the repository starts with a fresh, automatically seeded database.
+
+## Database Verification
+Below is a screenshot of the database open in DB Browser for SQLite, showing the `tasks` table.
+
+![Database Screenshot](readme_assets/tasks-table-screenshot.png)
+
+### Example SQL Query (from Stage 4)
+During Stage 4, I explored direct database manipulation. Here is an example query used to clean up completed tasks:
 
 ```sql
 DELETE FROM tasks WHERE done = 1;
 ```
-
-## What it returned
-
-It deleted every row whose `done` column was 1 — in my run, 6 rows. After it
-ran, `GET /tasks` from the API immediately returned `[]` with no server
-restart. That proved the API and the SQLite file are reading the same source
-of truth: a write in one place is visible everywhere instantly.
-
-## Notes from the experiment
-
-- `SELECT * FROM tasks WHERE done = 1` returned only the row that was already
-  marked done (id=7 "Survive restart"), since every other row had `done = 0`.
-- `UPDATE tasks SET done = 1` with no `WHERE` clause flipped every row at
-  once. **Lesson:** an UPDATE without a WHERE affects every row in the table.
-- `SELECT COUNT(*) FROM tasks` returned `6` — a single number, not a rowset.
-- After deleting everything, re-seeding produced ids `8, 9, 10` instead of
-  `1, 2, 3` because SQLite's AUTOINCREMENT counter persists even after rows
-  are deleted. The ids are unique, which is what matters; the counter doesn't
-  rewind.
+This query deleted all rows where the `done` column was set to 1, proving that changes made directly to the `.db` file are immediately reflected in the API responses.
