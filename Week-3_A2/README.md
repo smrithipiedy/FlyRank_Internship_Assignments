@@ -19,7 +19,7 @@ The database file lives at `tasks.db` in the project root. It is created automat
 ## Database Verification
 Below is a screenshot of the database open in DB Browser for SQLite, showing the `tasks` table.
 
-![Database Screenshot](readme_assets/tasks-table-screenshot.png)
+![Database Screenshot](../readme_assets/tasks-table-screenshot.png)
 
 ### Example SQL Query (from Stage 4)
 During Stage 4, I explored direct database manipulation. Here is an example query used to clean up completed tasks:
