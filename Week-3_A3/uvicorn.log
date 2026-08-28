@@ -1,0 +1,9 @@
+INFO:     Started server process [52948]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:3000 (Press CTRL+C to quit)
+Tasks table already populated (3 rows); skipping seed.
+INFO:     127.0.0.1:62097 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59655 - "GET /tasks HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59658 - "GET /tasks/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59661 - "GET /tasks/999 HTTP/1.1" 404 Not Found
