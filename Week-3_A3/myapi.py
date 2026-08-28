@@ -13,7 +13,7 @@ from init_db import init_db
 # the first request lands. Safe to call on every boot.
 init_db()
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tasks.db")
+DB_PATH = os.getenv("DATABASE_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "tasks.db"))
 
 app = FastAPI()
 

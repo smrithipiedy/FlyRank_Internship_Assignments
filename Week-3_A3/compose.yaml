@@ -1,0 +1,12 @@
+services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_PATH=/app/data/tasks.db
+    volumes:
+      - taskdata:/app/data
+
+volumes:
+  taskdata:

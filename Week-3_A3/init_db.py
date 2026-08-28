@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import sqlite3
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tasks.db")
+DB_PATH = os.getenv("DATABASE_PATH", os.path.join(os.path.dirname(os.path.abspath(__file__)), "tasks.db"))
 
 EXAMPLE_TASKS = [
     ("Buy milk", 0),
