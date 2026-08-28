@@ -12,7 +12,8 @@ docker compose up -d
 
 ## Configuration
 
-The application uses environment variables for configuration. 
+The application uses environment variables for configuration.
+
 1. Copy the example environment file:
    ```bash
    cp .env.example .env
@@ -21,17 +22,18 @@ The application uses environment variables for configuration.
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Success Code | Error Code |
-| :--- | :--- | :--- | :--- | :--- |
-| GET | `/tasks` | List all tasks | 200 OK | - |
-| GET | `/tasks/{id}` | Get a specific task by ID | 200 OK | 404 Not Found |
-| POST | `/tasks` | Create a new task | 201 Created | 400 Bad Request |
-| PUT | `/tasks/{id}` | Update a task | 200 OK | 400 / 404 |
-| DELETE | `/tasks/{id}` | Delete a task | 204 No Content | 404 Not Found |
+| Method | Endpoint      | Description               | Success Code   | Error Code      |
+| :----- | :------------ | :------------------------ | :------------- | :-------------- |
+| GET    | `/tasks`      | List all tasks            | 200 OK         | -               |
+| GET    | `/tasks/{id}` | Get a specific task by ID | 200 OK         | 404 Not Found   |
+| POST   | `/tasks`      | Create a new task         | 201 Created    | 400 Bad Request |
+| PUT    | `/tasks/{id}` | Update a task             | 200 OK         | 400 / 404       |
+| DELETE | `/tasks/{id}` | Delete a task             | 204 No Content | 404 Not Found   |
 
 ## Sample Output
 
 ### GET /tasks
+
 ```text
 HTTP/1.1 200 OK
 date: Fri, 28 Aug 2026 16:02:21 GMT
@@ -45,8 +47,9 @@ content-type: application/json
 ## Database Verification
 
 To verify the data in the SQLite database:
+
 1. Enter the container: `docker exec -it <container_id> sh`
 2. Open the database: `sqlite3 /app/data/tasks.db`
 3. Run the query: `SELECT * FROM tasks;`
 
-*(Insert screenshot here showing the output of the SELECT query)*
+![Docker exec Screenshot](../readme_assets/week-3_A3.png)
