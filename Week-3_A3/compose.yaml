@@ -4,7 +4,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_PATH=/app/data/tasks.db
+      - DATABASE_PATH=${DATABASE_PATH}
     volumes:
       - taskdata:/app/data
 

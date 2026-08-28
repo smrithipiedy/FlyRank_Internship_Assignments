@@ -18,7 +18,7 @@ EXAMPLE_TASKS = [
 ]
 
 def get_connection():
-    """Returns a connection to the Postgres database."""
+    # Returns a connection to the Postgres database.
     if not DATABASE_URL:
         raise ValueError("DATABASE_URL not found in environment variables")
     # Use RealDictCursor to get dictionary-like results
@@ -26,7 +26,7 @@ def get_connection():
     return conn
 
 def init_db() -> None:
-    """Create the schema (if missing) and seed example rows (only when empty)."""
+    # Create the schema (if missing) and seed example rows (only when empty).
     try:
         with get_connection() as conn:
             with conn.cursor() as cur:
