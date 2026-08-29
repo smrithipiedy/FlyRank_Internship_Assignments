@@ -68,4 +68,4 @@ The server will be available at `http://localhost:8000`.
 4. Paste your token and click **Authorize**.
 5. You can now test the protected endpoints directly from the browser.
 
-![Swagger UI](./readme_assets/A4-swagger-screenshot.png)
+![Swagger UI](../readme_assets/A4-swagger-screenshot.png)
