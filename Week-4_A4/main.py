@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import FastAPI, HTTPException, Request, status, Header
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, EmailStr
@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import os
 import uvicorn
 import logging
+from typing import Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -49,6 +50,27 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 @app.get("/")
 async def root():
     return {"message": "Server is running and connected to Supabase"}
+
+# --- Stage 2: Public & Protected Gates ---
+
+@app.get("/public/info")
+async def get_public_info():
+    return {"message": "Welcome stranger! This info is public."}
+
+@app.get("/protected/profile")
+async def get_protected_profile(request: Request):
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": "Access token required"}
+        )
+
+    # At this stage, we only check if the token is present and correctly prefixed
+    return {"message": "Welcome to your profile!"}
+
+# ------------------------------------------
 
 @app.post("/auth/signup", status_code=status.HTTP_201_CREATED)
 async def signup(auth_data: AuthRequest):
