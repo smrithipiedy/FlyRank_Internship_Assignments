@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException, Request, status, Header
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, Request, status, Header, Depends
+from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, EmailStr
 from supabase import create_client, Client
@@ -47,24 +47,15 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content={"error": "Bad Request"},
     )
 
-@app.get("/")
-async def root():
-    return {"message": "Server is running and connected to Supabase"}
+# --- Middleware Guard (Dependency) ---
 
-# --- Stage 2: Public & Protected Gates ---
-
-@app.get("/public/info")
-async def get_public_info():
-    return {"message": "Welcome stranger! This info is public."}
-
-@app.get("/protected/profile")
-async def get_protected_profile(request: Request):
+async def get_current_user(request: Request):
     auth_header = request.headers.get("Authorization")
 
     if not auth_header or not auth_header.startswith("Bearer "):
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            content={"error": "Access token required"}
+            detail="Access token required"
         )
 
     token = auth_header.split(" ")[1]
@@ -75,24 +66,48 @@ async def get_protected_profile(request: Request):
         user = response.user
 
         if not user:
-            return JSONResponse(
+            raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                content={"error": "Invalid or expired token"}
+                detail="Invalid or expired token"
             )
-
-        return {
-            "id": user.id,
-            "email": user.email,
-            "created_at": user.created_at
-        }
+        return user
     except Exception as e:
         logger.error(f"Token verification error: {str(e)}")
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            content={"error": "Invalid or expired token"}
+            detail="Invalid or expired token"
         )
 
 # ------------------------------------------
+
+@app.get("/")
+async def root():
+    return {"message": "Server is running and connected to Supabase"}
+
+@app.get("/public/info")
+async def get_public_info():
+    return {"message": "Welcome stranger! This info is public."}
+
+@app.get("/protected/profile")
+async def get_protected_profile(user = Depends(get_current_user)):
+    return {
+        "id": user.id,
+        "email": user.email,
+        "created_at": user.created_at
+    }
+
+@app.get("/protected/dashboard")
+async def get_protected_dashboard(user = Depends(get_current_user)):
+    return {"message": "Welcome to your dashboard!"}
+
+@app.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(user = Depends(get_current_user)):
+    try:
+        supabase.auth.sign_out()
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        logger.error(f"Logout error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error during logout")
 
 @app.post("/auth/signup", status_code=status.HTTP_201_CREATED)
 async def signup(auth_data: AuthRequest):
@@ -116,7 +131,6 @@ async def login(auth_data: AuthRequest):
         return response
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
-        # Requirement: return 401 with { "error": "Invalid login credentials" }
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
             content={"error": "Invalid login credentials"}
