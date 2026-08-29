@@ -67,8 +67,30 @@ async def get_protected_profile(request: Request):
             content={"error": "Access token required"}
         )
 
-    # At this stage, we only check if the token is present and correctly prefixed
-    return {"message": "Welcome to your profile!"}
+    token = auth_header.split(" ")[1]
+
+    try:
+        # Verify token with Supabase
+        response = supabase.auth.get_user(token)
+        user = response.user
+
+        if not user:
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"error": "Invalid or expired token"}
+            )
+
+        return {
+            "id": user.id,
+            "email": user.email,
+            "created_at": user.created_at
+        }
+    except Exception as e:
+        logger.error(f"Token verification error: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error": "Invalid or expired token"}
+        )
 
 # ------------------------------------------
 
