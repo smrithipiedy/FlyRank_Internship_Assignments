@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request, status, Header, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, EmailStr
@@ -49,20 +50,12 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 # --- Middleware Guard (Dependency) ---
 
-async def get_current_user(request: Request):
-    auth_header = request.headers.get("Authorization")
+security = HTTPBearer()
 
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Access token required"
-        )
-
-    token = auth_header.split(" ")[1]
-
+async def get_current_user(token: HTTPAuthorizationCredentials = Depends(security)):
     try:
         # Verify token with Supabase
-        response = supabase.auth.get_user(token)
+        response = supabase.auth.get_user(token.credentials)
         user = response.user
 
         if not user:
