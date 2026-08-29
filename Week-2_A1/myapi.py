@@ -3,7 +3,6 @@ from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
-# In-memory list of task objects (pre-filled with 3 examples)
 tasks = [
     {"id": 1, "done": False},
     {"id": 2, "done": True},

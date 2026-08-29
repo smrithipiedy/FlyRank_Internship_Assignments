@@ -13,7 +13,6 @@ EXAMPLE_TASKS = [
 
 
 def init_db(db_path: str = DB_PATH) -> None:
-    """Create the schema (if missing) and seed example rows (only when empty)."""
     conn = sqlite3.connect(db_path)
     try:
         cur = conn.cursor()
