@@ -78,6 +78,8 @@ def get_html(url, cache=True, stats=None):
         if stats is not None:
             stats['cache_hits'] = stats.get('cache_hits', 0) + 1
         return content
+    else:
+        pass
 
     # 2. Polite Fetch with retries
     headers = {"User-Agent": USER_AGENT}
@@ -136,7 +138,7 @@ def extract_book_details(url, source_page, stats=None):
     """
     Extracts raw records from a book detail page.
     """
-    html = get_html(url, cache=False, stats=stats)
+    html = get_html(url, cache=True, stats=stats)
     if not html:
         return None
 
